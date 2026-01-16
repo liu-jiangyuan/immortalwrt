@@ -102,7 +102,7 @@ RUN ./scripts/feeds install -a
 RUN make defconfig
 
 # 编译
-RUN make -j8 V=s
+RUN make -j3
 
 ############################################
 # Stage 2: Export firmware only
