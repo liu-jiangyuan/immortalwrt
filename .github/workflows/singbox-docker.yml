@@ -1,0 +1,57 @@
+name: Build ImmortalWrt MT7981 Sing-Box-Docker (BT R320)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt update 
+          sudo apt install -y \
+            build-essential \
+            make gcc g++ \
+            clang llvm \
+            flex bison gawk \
+            git wget curl rsync unzip file time \
+            libncurses-dev libssl-dev zlib1g-dev \
+            python3 python3-distutils python3-dev\
+            python3-setuptools python3-socks python3-unidecode swig \
+            cmake ninja-build \
+            libelf-dev \
+            jq \
+            ccache\
+            vim \
+            libncurses5-dev gettext xsltproc \
+            bzip2 \
+            patch
+
+      - name: Update feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Load config
+        run: |
+          cp singbox-docker.config .config
+          make defconfig
+
+      - name: Download packages
+        run: |
+          make download -j8
+
+      - name: Build firmware
+        run: |
+          make -j4
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: bin/targets/

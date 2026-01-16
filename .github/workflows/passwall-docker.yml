@@ -1,4 +1,4 @@
-name: Build ImmortalWrt MT7981 (BT R320)
+name: Build ImmortalWrt MT7981 PassWall-Docker (BT R320)
 
 on:
   workflow_dispatch:
@@ -13,7 +13,8 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          apt update && apt install -y \
+          sudo apt update 
+          sudo apt install -y \
             build-essential \
             make gcc g++ \
             clang llvm \
@@ -38,7 +39,7 @@ jobs:
 
       - name: Load config
         run: |
-          cp sing-box-docker.config .config
+          cp passwall-docker.config .config
           make defconfig
 
       - name: Download packages
