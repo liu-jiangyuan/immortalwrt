@@ -18,6 +18,7 @@ jobs:
 
       - name: Load config
         run: |
+          cp passwall-docker.config .config
           make defconfig
 
       - name: Download packages

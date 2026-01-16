@@ -1,10 +1,12 @@
-FROM ubuntu:22.04
+############################################
+# Stage 1: Builder
+############################################
+FROM ubuntu:22.04 AS builder
 
+ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /workdir
 
-RUN apt update
-
-RUN apt install -y \
+RUN apt update && apt install -y \
   build-essential \
   make gcc g++ \
   clang llvm \
@@ -23,8 +25,7 @@ RUN apt install -y \
   patch && rm -rf /var/lib/apt/lists/*
 
 # 创建 builder 用户
-RUN useradd -m builder && echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
+RUN useradd -m builder
 
 # 克隆源码
 RUN git clone https://github.com/liu-jiangyuan/immortalwrt.git
@@ -39,8 +40,8 @@ RUN cat <<'EOF' > .config
 # Target
 # =========================
 CONFIG_TARGET_mediatek=y
-CONFIG_TARGET_mediatek_mt7981=y
-CONFIG_TARGET_mediatek_mt7981_DEVICE_bt_r320=y
+CONFIG_TARGET_mediatek_filogic=y
+CONFIG_TARGET_mediatek_filogic_DEVICE_bt_r320=y
 
 # =========================
 # LuCI
@@ -93,15 +94,20 @@ CONFIG_BUILD_LOG=y
 
 EOF
 
-# 确认文件存在并可写
-RUN ls -l .config
-
-# 或者直接在容器内生成默认配置：
-RUN make defconfig
-
 # 更新和安装 feeds
 RUN ./scripts/feeds update -a
 RUN ./scripts/feeds install -a
 
+# 或者直接在容器内生成默认配置：
+RUN make defconfig
+
 # 编译
-RUN make -j6
+RUN make -j8 V=s
+
+############################################
+# Stage 2: Export firmware only
+############################################
+FROM scratch AS output
+
+# 只保留编译产物
+COPY --from=builder /workdir/immortalwrt/bin /bin
