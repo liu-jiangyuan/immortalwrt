@@ -39,7 +39,7 @@ jobs:
 
       - name: Load config
         run: |
-          cp sing-box-docker.config .config
+          cp passwall-docker.config .config
           make defconfig
 
       - name: Download packages
