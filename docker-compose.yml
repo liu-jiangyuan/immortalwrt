@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  immortalwrt-builder:
+    build: ./
+    container_name: immortalwrt-builder
+    tty: true
+    stdin_open: true
+    volumes:
+      - immortalwrt-src:/workdir
+      - ./ccache:/root/.ccache
+    working_dir: /workdir/immortalwrt
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - CCACHE_DIR=/root/.ccache
+    command: bash
+
+volumes:
+  immortalwrt-src:
