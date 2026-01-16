@@ -13,7 +13,8 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          apt update && apt install -y \
+          sudo apt update
+          sudo apt install -y \
             build-essential \
             make gcc g++ \
             clang llvm \
