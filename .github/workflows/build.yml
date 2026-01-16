@@ -1,0 +1,35 @@
+name: Build ImmortalWrt MT7981 (BT R320)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Load config
+        run: |
+          make defconfig
+
+      - name: Download packages
+        run: |
+          make download -j8
+
+      - name: Build firmware
+        run: |
+          make -j$(nproc)
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: bin/targets/
