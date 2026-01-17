@@ -24,15 +24,15 @@ RUN apt update && apt install -y \
   ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
-# builder 用户
+# 创建 builder 用户
 RUN useradd -m builder
-RUN mkdir /ccache && chown builder:builder /ccache
-
-USER builder
-WORKDIR /workdir
 
 # 克隆源码
 RUN git clone https://github.com/liu-jiangyuan/immortalwrt.git
+# 在克隆时改权限
+RUN chown -R builder:builder /workdir/immortalwrt
+# 切换到非 root 用户
+USER builder
 WORKDIR /workdir/immortalwrt
 
 ############################################
