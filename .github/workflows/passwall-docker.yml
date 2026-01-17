@@ -35,6 +35,11 @@ jobs:
             libncurses5-dev gettext xsltproc \
             bzip2 patch
 
+      # ⭐ 关键：强制清理，确保 SUPPORTED_DEVICES 生效
+      - name: Clean build tree
+        run: | 
+          make dirclean || true
+
       # 只 cache dl（这是安全的）
       - name: Cache dl
         uses: actions/cache@v4
@@ -67,3 +72,7 @@ jobs:
         with:
           name: firmware
           path: bin/targets/
+
+      - name: Dump sysupgrade metadata
+        run: |
+          fwtool -i bin/targets/mediatek/filogic/*sysupgrade.itb
