@@ -4,37 +4,45 @@
 FROM ubuntu:22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CCACHE_DIR=/ccache
+
 WORKDIR /workdir
 
 RUN apt update && apt install -y \
   build-essential \
-  make gcc g++ \
-  clang llvm \
+  gcc g++ make \
   flex bison gawk \
   git wget curl rsync unzip file time \
   libncurses-dev libssl-dev zlib1g-dev \
-  python3 python3-distutils python3-dev\
-  python3-setuptools python3-socks python3-unidecode swig \
-  cmake ninja-build \
+  python3 python3-dev python3-setuptools \
+  swig \
   libelf-dev \
   jq \
-  ccache\
-  vim \
+  ccache \
   libncurses5-dev gettext xsltproc \
-  bzip2 \
-  patch && rm -rf /var/lib/apt/lists/*
+  bzip2 patch \
+  ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
-# 创建 builder 用户
+# builder 用户
 RUN useradd -m builder
+RUN mkdir /ccache && chown builder:builder /ccache
+
+USER builder
+WORKDIR /workdir
 
 # 克隆源码
 RUN git clone https://github.com/liu-jiangyuan/immortalwrt.git
-# 在克隆时改权限
-RUN chown -R builder:builder /workdir/immortalwrt
-# 切换到非 root 用户
-USER builder
 WORKDIR /workdir/immortalwrt
 
+############################################
+# feeds（单独一层，利于缓存）
+############################################
+RUN ./scripts/feeds update -a && ./scripts/feeds install -a
+
+############################################
+# 写入 config
+############################################
 RUN cat <<'EOF' > .config
 # =========================
 # Target
@@ -50,42 +58,52 @@ CONFIG_PACKAGE_luci=y
 CONFIG_LUCI_LANG_zh_Hans=y
 
 # =========================
-# sing-box
+# sing-box + LuCI
 # =========================
 CONFIG_PACKAGE_sing-box=y
 CONFIG_PACKAGE_luci-app-sing-box=y
 CONFIG_PACKAGE_luci-i18n-sing-box-zh-cn=y
 
+# sing-box 基础网络依赖
+CONFIG_PACKAGE_iptables=y
+CONFIG_PACKAGE_iptables-nft=y
+CONFIG_PACKAGE_ipset=y
+
+CONFIG_PACKAGE_kmod-nf-tproxy=y
+CONFIG_PACKAGE_kmod-ipt-ipset=y
+
 # =========================
 # Docker
 # =========================
-CONFIG_PACKAGE_dockerd=y
 CONFIG_PACKAGE_docker=y
-CONFIG_PACKAGE_luci-app-docker=y
-CONFIG_PACKAGE_luci-i18n-docker-zh-cn=y
-
-# =========================
-# 必要依赖（Docker 运行必需）
-# =========================
+CONFIG_PACKAGE_dockerd=y
 CONFIG_PACKAGE_containerd=y
 CONFIG_PACKAGE_runc=y
 CONFIG_PACKAGE_cgroupfs-mount=y
+
+# Docker 网络必需内核模块
 CONFIG_PACKAGE_kmod-veth=y
 CONFIG_PACKAGE_kmod-bridge=y
 CONFIG_PACKAGE_kmod-br-netfilter=y
+
+CONFIG_PACKAGE_kmod-nf-conntrack=y
 CONFIG_PACKAGE_kmod-nf-nat=y
 CONFIG_PACKAGE_kmod-ipt-nat=y
-CONFIG_PACKAGE_kmod-iptable-nat=y
+CONFIG_PACKAGE_kmod-ipt-filter=y
+
+# LuCI Docker 管理
+CONFIG_PACKAGE_luci-app-dockerman=y
+CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y
 
 # =========================
-# 编译优化
+# 编译优化（本地 OK，Actions 也能用）
 # =========================
 CONFIG_CCACHE=y
 CONFIG_DEVEL=y
 CONFIG_BUILD_LOG=y
 
 # =========================
-# 明确禁用（防止冲突）
+# 明确禁用 PassWall（避免拉一堆核心）
 # =========================
 # CONFIG_PACKAGE_passwall is not set
 # CONFIG_PACKAGE_passwall2 is not set
@@ -94,20 +112,20 @@ CONFIG_BUILD_LOG=y
 
 EOF
 
-# 更新和安装 feeds
-RUN ./scripts/feeds update -a
-RUN ./scripts/feeds install -a
-
-# 或者直接在容器内生成默认配置：
 RUN make defconfig
 
+############################################
+# 下载源码包
+############################################
+RUN make download -j$(nproc)
+
+############################################
 # 编译
-RUN make -j3
+############################################
+RUN make -j4
 
 ############################################
-# Stage 2: Export firmware only
+# Stage 2: Export firmware
 ############################################
-FROM scratch AS output
-
-# 只保留编译产物
-COPY --from=builder /workdir/immortalwrt/bin /bin
+FROM alpine:3.19 AS output
+COPY --from=builder /workdir/immortalwrt/bin /output
