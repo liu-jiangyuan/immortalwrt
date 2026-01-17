@@ -72,7 +72,3 @@ jobs:
         with:
           name: firmware
           path: bin/targets/
-
-      - name: Dump sysupgrade metadata
-        run: |
-          fwtool -i bin/targets/mediatek/filogic/*sysupgrade.itb
