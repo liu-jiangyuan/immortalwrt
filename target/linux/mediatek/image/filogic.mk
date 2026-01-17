@@ -2509,6 +2509,7 @@ define Device/openwrt_one
   DEVICE_MODEL := One
   DEVICE_DTS := mt7981b-openwrt-one
   DEVICE_DTS_DIR := ../dts
+  SUPPORTED_DEVICES := openwrt,one bt,r320
   DEVICE_DTC_FLAGS := --pad 4096
   DEVICE_DTS_LOADADDR := 0x43f00000
   DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware \

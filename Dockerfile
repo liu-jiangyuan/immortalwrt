@@ -6,11 +6,13 @@ FROM ubuntu:22.04 AS builder
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CCACHE_DIR=/ccache
 
+# 和 Actions 一样：不追求高并行
+ENV MAKEFLAGS="-j2"
+
 WORKDIR /workdir
 
 RUN apt update && apt install -y \
-  build-essential \
-  gcc g++ make \
+  build-essential gcc g++ make \
   flex bison gawk \
   git wget curl rsync unzip file time \
   libncurses-dev libssl-dev zlib1g-dev \
@@ -25,7 +27,9 @@ RUN apt update && apt install -y \
   && rm -rf /var/lib/apt/lists/*
 
 # 创建 builder 用户
-RUN useradd -m builder
+RUN useradd -m builder \
+    && mkdir -p /workdir /ccache \
+     && chown -R builder:builder /workdir /ccache
 
 # 克隆源码
 RUN git clone https://github.com/liu-jiangyuan/immortalwrt.git
@@ -36,9 +40,10 @@ USER builder
 WORKDIR /workdir/immortalwrt
 
 ############################################
-# feeds（单独一层，利于缓存）
+# feeds（单独一层，利于 Docker cache）
 ############################################
-RUN ./scripts/feeds update -a && ./scripts/feeds install -a
+RUN ./scripts/feeds update -a \
+ && ./scripts/feeds install -a
 
 ############################################
 # 写入 config
@@ -115,14 +120,14 @@ EOF
 RUN make defconfig
 
 ############################################
-# 下载源码包
+# 下载源码包（Actions 同款并行度）
 ############################################
-RUN make download -j$(nproc)
+RUN make download -j2
 
 ############################################
-# 编译
+# 编译（Actions 同款兜底）
 ############################################
-RUN make -j4
+RUN make -j2 || make -j1 V=s
 
 ############################################
 # Stage 2: Export firmware

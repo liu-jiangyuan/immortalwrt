@@ -8,7 +8,7 @@ services:
     stdin_open: true
     volumes:
       - immortalwrt-src:/workdir
-      - ./ccache:/root/.ccache
+      - ./ccache:/ccache
     working_dir: /workdir/immortalwrt
     environment:
       - DEBIAN_FRONTEND=noninteractive
