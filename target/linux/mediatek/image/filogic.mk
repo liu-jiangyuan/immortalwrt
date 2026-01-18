@@ -3397,3 +3397,36 @@ define Device/zyxel_nwa50ax-pro
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += zyxel_nwa50ax-pro
+
+define Device/bt_r320
+  DEVICE_VENDOR := BT
+  DEVICE_MODEL := R320
+  DEVICE_DTS := mt7981-bt-r320
+  DEVICE_DTS_DIR := ../dts
+  DEVICE_DTC_FLAGS := --pad 4096
+  DEVICE_DTS_LOADADDR := 0x43f00000
+
+  SUPPORTED_DEVICES := bt,r320
+
+  KERNEL_LOADADDR := 0x44000000
+  KERNEL := kernel-bin | gzip
+
+  KERNEL_INITRAMFS := kernel-bin | lzma | \
+        fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
+  KERNEL_INITRAMFS_SUFFIX := .itb
+
+  KERNEL_IN_UBI := 1
+  UBOOTENV_IN_UBI := 1
+
+  IMAGES := sysupgrade.itb
+  IMAGE/sysupgrade.itb := append-kernel | \
+        fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-with-rootfs | \
+        pad-rootfs | append-metadata
+
+  DEVICE_PACKAGES := \
+        kmod-mt7981-firmware \
+        mt7981-wo-firmware \
+        kmod-mt7915e
+endef
+
+TARGET_DEVICES += bt_r320
