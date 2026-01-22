@@ -40,7 +40,7 @@ jobs:
 
       - name: Configure BT R320
         run: |
-          cp .config_bt_r320 .config
+          cp bt_r320.config .config
 
       - name: Compile with ccache
         run: |
