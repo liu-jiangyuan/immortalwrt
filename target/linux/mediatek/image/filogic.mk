@@ -678,7 +678,7 @@ define Device/bt_r320
   DEVICE_VENDOR := BT
   DEVICE_MODEL := R320
   DEVICE_DTS := mt7981b-bt-r320
-  DEVICE_DTS_DIR := $(DTS_DIR)/mediatek
+  DEVICE_DTS_DIR := ../dts
   SUPPORTED_DEVICES := bt,r320
 
   IMAGES := sysupgrade.bin
@@ -693,7 +693,6 @@ define Device/bt_r320
 	luci-app-samba4
 endef
 TARGET_DEVICES += bt_r320
-
 
 define Device/cmcc_rax3000me
   DEVICE_VENDOR := CMCC
