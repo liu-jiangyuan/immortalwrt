@@ -68,7 +68,7 @@ jobs:
 
       - name: Load config
         run: |
-          cp passwall-docker.config .config
+          cp bt_r320.config .config
           make defconfig
 
       - name: Download packages
