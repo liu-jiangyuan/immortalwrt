@@ -41,12 +41,7 @@ jobs:
 
     - name: Configure BT R320
       run: |
-        cat > .config <<EOF
-CONFIG_TARGET_mediatek=y
-CONFIG_TARGET_mediatek_filogic=y
-CONFIG_TARGET_mediatek_filogic_DEVICE_bt_r320=y
-CONFIG_DEVEL=y
-EOF
+        cp bt_r320.config .config
 
     - name: Compile with ccache
       run: |
