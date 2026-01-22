@@ -13,25 +13,31 @@ jobs:
       TZ: Asia/Singapore
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 5G
+      TERM: xterm
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Setup ccache
-        run: |
-          sudo apt update
-          sudo apt install -y ccache
-          ccache -M 5G
-          ccache -s
+      - name: Cache ccache
+        uses: actions/cache@v3
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/bt_r320.config') }}
 
       - name: Install build dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential git libncurses5-dev zlib1g-dev gawk flex \
-          gettext wget unzip python3 python3-setuptools python3-venv \
-          rsync bc file bzip2 perl make libssl-dev subversion libncurses-dev
+          sudo apt install -y \
+            ccache build-essential git libncurses5-dev zlib1g-dev gawk flex \
+            gettext wget unzip python3 python3-distutils python3-setuptools python3-venv \
+            rsync bc file bzip2 perl make libssl-dev subversion libncurses-dev
+
+      - name: Setup ccache
+        run: |
+          ccache -M 5G
+          ccache -s
 
       - name: Update feeds
         run: |
@@ -39,8 +45,7 @@ jobs:
           ./scripts/feeds install -a
 
       - name: Configure BT R320
-        run: |
-          cp bt_r320.config .config
+        run: cp bt_r320.config .config
 
       - name: Compile with ccache
         run: |
@@ -48,12 +53,10 @@ jobs:
           make -j$(nproc) V=s
 
       - name: Show ccache stats
-        run: |
-          ccache -s
+        run: ccache -s
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: bt_r320-build
-          path: |
-            bin/targets/mediatek/filogic/*bt_r320*.bin
+          path: bin/targets/mediatek/filogic/*bt_r320*.bin
