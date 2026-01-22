@@ -678,16 +678,22 @@ define Device/bt_r320
   DEVICE_VENDOR := BT
   DEVICE_MODEL := R320
   DEVICE_DTS := mt7981b-bt-r320
+  DEVICE_DTS_DIR := $(DTS_DIR)/mediatek
   SUPPORTED_DEVICES := bt,r320
+
+  IMAGES := sysupgrade.bin
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
+
   DEVICE_PACKAGES := \
-	kmod-mt7981-firmware \
+	mt7981-wo-firmware \
 	kmod-mt7915e \
-	kmod-usb3 \
+	kmod-usb-core kmod-usb-xhci-hcd kmod-usb-xhci-mtk \
 	kmod-mmc \
 	f2fsck mkf2fs \
 	luci-app-samba4
 endef
 TARGET_DEVICES += bt_r320
+
 
 define Device/cmcc_rax3000me
   DEVICE_VENDOR := CMCC
