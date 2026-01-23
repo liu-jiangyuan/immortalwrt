@@ -19,7 +19,6 @@
 	chosen {
 		bootargs-override = "root=/dev/fit0 rootwait";
 		stdout-path = "serial0:115200n8";
-		rootdisk = <&emmc_rootdisk>;
 	};
 
 	memory {
@@ -29,17 +28,17 @@
 	gpio-keys {
 		compatible = "gpio-keys";
 
-		button-reset {
-			label = "reset";
-			linux,code = <KEY_RESTART>;
-			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
-		};
+		reset {
+             label = "reset";
+             linux,code = <KEY_RESTART>;
+             gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+           };
 
-		button-wps {
-			label = "wps";
-			linux,code = <KEY_WPS_BUTTON>;
-			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
-		};
+        wps {
+             label = "wps";
+             linux,code = <KEY_WPS_BUTTON>;
+             gpios = <&pio 0 GPIO_ACTIVE_LOW>;
+           };
 	};
 
 	gpio-leds {
@@ -57,15 +56,6 @@
 			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
 		};
 	};
-
-	reg_3p3v: regulator-3p3v {
-		compatible = "regulator-fixed";
-		regulator-name = "fixed-3.3V";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		regulator-boot-on;
-		regulator-always-on;
-	};
 };
 
 &eth {
@@ -76,14 +66,18 @@
 		reg = <0>;
 		phy-mode = "2500base-x";
 
-		nvmem-cells = <&macaddr_factory_2a 0>;
-		nvmem-cell-names = "mac-address";
-
 		fixed-link {
 			speed = <2500>;
 			full-duplex;
 			pause;
 		};
+	};
+
+	gmac1: mac@1 {
+		compatible = "mediatek,eth-mac";
+		reg = <1>;
+		phy-mode = "gmii";
+		phy-handle = <&int_gbe_phy>;
 	};
 };
 
@@ -101,58 +95,6 @@
 
 &mmc0 {
 	status = "okay";
-
-	pinctrl-names = "default", "state_uhs";
-	pinctrl-0 = <&mmc0_pins_default>;
-	pinctrl-1 = <&mmc0_pins_uhs>;
-	bus-width = <8>;
-	max-frequency = <52000000>;
-	vmmc-supply = <&reg_3p3v>;
-	cap-mmc-highspeed;
-	non-removable;
-	no-sd;
-	no-sdio;
-
-	card@0 {
-		compatible = "mmc-card";
-		reg = <0>;
-
-		block {
-			compatible = "block-device";
-
-			partitions {
-				block-partition-factory {
-					partname = "factory";
-
-					nvmem-layout {
-						compatible = "fixed-layout";
-						#address-cells = <1>;
-						#size-cells = <1>;
-
-						eeprom_factory_0: eeprom@0 {
-							reg = <0x0 0x1000>;
-						};
-
-						macaddr_factory_24: macaddr@24 {
-							compatible = "mac-base";
-							reg = <0x24 0x6>;
-							#nvmem-cell-cells = <1>;
-						};
-
-						macaddr_factory_2a: macaddr@2a {
-							compatible = "mac-base";
-							reg = <0x2a 0x6>;
-							#nvmem-cell-cells = <1>;
-						};
-					};
-				};
-
-				emmc_rootdisk: block-partition-production {
-					partname = "production";
-				};
-			};
-		};
-	};
 };
 
 &switch {
@@ -196,24 +138,11 @@
 		};
 	};
 };
-
-&pio {
-	mmc0_pins_default: mmc0-pins-default {
-		mux {
-			function = "flash";
-			groups = "emmc_45";
-		};
-	};
-
-	mmc0_pins_uhs: mmc0-pins-uhs {
-		mux {
-			function = "flash";
-			groups = "emmc_45";
-		};
-	};
+&uart0 {
+	status = "okay";
 };
 
-&uart0 {
+&usb_phy {
 	status = "okay";
 };
 
@@ -222,12 +151,6 @@
 };
 
 &wifi {
-	nvmem-cells = <&eeprom_factory_0>;
-	nvmem-cell-names = "eeprom";
-	status = "okay";
-};
-
-&usb_phy {
 	status = "okay";
 };
 
