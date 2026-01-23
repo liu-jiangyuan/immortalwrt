@@ -675,22 +675,26 @@ endef
 TARGET_DEVICES += cmcc_rax3000m
 
 define Device/bt_r320
-  DEVICE_VENDOR := BT
-  DEVICE_MODEL := R320
+  DEVICE_VENDOR := Globitel
+  DEVICE_MODEL := BT-R320
   DEVICE_DTS := mt7981b-bt-r320
   DEVICE_DTS_DIR := ../dts
-  SUPPORTED_DEVICES := bt,r320
-
-  IMAGES := sysupgrade.bin
+  DEVICE_DTC_FLAGS := --pad 4096
+  DEVICE_DTS_LOADADDR := 0x43f00000
+  DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware kmod-usb3 automount e2fsprogs f2fsck mkf2fs
+  KERNEL_LOADADDR := 0x44000000
+  KERNEL := kernel-bin | gzip
+  KERNEL_INITRAMFS := kernel-bin | lzma | \
+	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
+  KERNEL_INITRAMFS_SUFFIX := -recovery.itb
+  IMAGES := sysupgrade.itb sysupgrade.bin
+  IMAGE_SIZE := $$(shell expr 64 + $$(CONFIG_TARGET_ROOTFS_PARTSIZE))m
+  IMAGE/sysupgrade.itb := append-kernel | fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | pad-rootfs | append-metadata
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
-
-  DEVICE_PACKAGES := \
-	mt7981-wo-firmware \
-	kmod-mt7915e \
-	kmod-usb-core kmod-usb-xhci-hcd kmod-usb-xhci-mtk \
-	kmod-mmc \
-	f2fsck mkf2fs \
-	luci-app-samba4
+  ARTIFACTS :=gpt.bin preloader.bin bl31-uboot.fip
+  ARTIFACT/gpt.bin := mt798x-gpt emmc
+  ARTIFACT/preloader.bin := mt7981-bl2 emmc-ddr4
+  ARTIFACT/bl31-uboot.fip := mt7981-bl31-uboot bt_r320
 endef
 TARGET_DEVICES += bt_r320
 

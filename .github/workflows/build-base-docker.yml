@@ -1,4 +1,4 @@
-name: Build ImmortalWrt MT7981 (BT R320-Docker)
+name: Build ImmortalWrt MT7981 (BT R320)
 
 on:
   push:
