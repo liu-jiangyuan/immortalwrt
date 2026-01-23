@@ -53,37 +53,15 @@
 	status = "okay";
 };
 
-&gsw {
-	status = "okay";
-
-	port@0 {
-		status = "okay";
-		label = "lan1";
-	};
-
-	port@1 {
-		status = "okay";
-		label = "lan2";
-	};
-
-	port@2 {
-		status = "okay";
-		label = "lan3";
-	};
-
-	port@4 {
-		status = "okay";
-		label = "wan";
-	};
-};
-
-&hnat {
-	mtketh-wan = "wan";
-	mtketh-lan = "lan";
+&wifi {
 	status = "okay";
 };
 
 &xhci {
+	status = "okay";
+};
+
+&usb_phy {
 	status = "okay";
 };
 
@@ -96,11 +74,5 @@
 };
 
 &mmc0 {
-	bus-width = <8>;
-	cap-mmc-highspeed;
-	max-frequency = <52000000>;
-	non-removable;
-	no-sd;
-	no-sdio;
 	status = "okay";
 };
