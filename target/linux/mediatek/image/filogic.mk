@@ -681,9 +681,6 @@ define Device/bt_r320
   DEVICE_DTS_DIR := ../dts
   DEVICE_DTS_LOADADDR := 0x43f00000
 
-  KERNEL_LOADADDR := 0x44000000
-  KERNEL := kernel-bin | gzip
-
   DEVICE_PACKAGES := \
 	kmod-mt7915e \
 	kmod-mt7981-firmware \
@@ -691,10 +688,7 @@ define Device/bt_r320
 	kmod-usb3 automount \
 	e2fsprogs f2fsck mkf2fs
 
-  IMAGES := sysupgrade.itb sysupgrade.bin
-  IMAGE/sysupgrade.itb := append-kernel | fit gzip \
-	$(KDIR)/image-$(firstword $(DEVICE_DTS)).dtb external-static-with-rootfs | \
-	append-metadata
+  IMAGES := sysupgrade.bin
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += bt_r320
