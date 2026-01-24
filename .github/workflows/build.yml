@@ -77,7 +77,7 @@ jobs:
 
       - name: Build firmware
         run: |
-          make -j2 || make -j1 V=s
+          make -j2 V=s
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
