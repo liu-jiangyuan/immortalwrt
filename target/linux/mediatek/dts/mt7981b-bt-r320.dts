@@ -8,8 +8,8 @@
 #include "mt7981.dtsi"
 
 / {
-	model = "BT R320";
-	compatible = "bt,r320", "mediatek,mt7981";
+	model = "Globitel BT-R320";
+	compatible = "globitel,bt-r320", "mediatek,mt7981";
 
 	aliases {
 		serial0 = &uart0;
@@ -17,7 +17,6 @@
 	};
 
 	chosen {
-		bootargs-override = "root=/dev/fit0 rootwait";
 		stdout-path = "serial0:115200n8";
 	};
 
@@ -94,6 +93,8 @@
 };
 
 &mmc0 {
+	bus-width = <8>;
+	non-removable;
 	status = "okay";
 };
 
