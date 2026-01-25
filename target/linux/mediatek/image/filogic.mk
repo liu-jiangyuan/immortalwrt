@@ -688,11 +688,13 @@ define Device/bt_r320
   KERNEL_INITRAMFS := kernel-bin | lzma | \
 	fit lzma $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb with-initrd | pad-to 64k
   KERNEL_INITRAMFS_SUFFIX := -recovery.itb
-  IMAGES := sysupgrade.itb
+  IMAGES := sysupgrade.itb sysupgrade.bin
   IMAGE_SIZE := $$(shell expr 64 + $$(CONFIG_TARGET_ROOTFS_PARTSIZE))m
   IMAGE/sysupgrade.itb := append-kernel | \
 	fit gzip $$(KDIR)/image-$$(firstword $$(DEVICE_DTS)).dtb external-static-with-rootfs | \
 	pad-rootfs | append-metadata
+
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
   ARTIFACTS :=gpt.bin preloader.bin bl31-uboot.fip
   ARTIFACT/gpt.bin := mt798x-gpt emmc
   ARTIFACT/preloader.bin := mt7981-bl2 emmc-ddr4
