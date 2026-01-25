@@ -46,11 +46,16 @@ jobs:
             libncurses5-dev gettext xsltproc \
             bzip2 patch
       
-      # ⭐ 关键：强制清理，确保 SUPPORTED_DEVICES 生效
-      - name: Clean build tree
+#      # ⭐ 关键：强制清理，确保 SUPPORTED_DEVICES 生效
+#      - name: Clean build tree
+#        run: |
+#          make target/linux/clean || true
+#          make dirclean || true
+
+      - name: Light clean (kernel + images only)
         run: |
-          make target/linux/clean || true
-          make dirclean || true
+          make target/linux/clean
+          rm -rf bin/targets
 
       # 只 cache dl（这是安全的）
       - name: Cache dl
@@ -77,8 +82,8 @@ jobs:
 
       - name: Build firmware
         run: |
-          make -j2 || make -j1 V=s
-
+#          make -j2 || make -j1 V=s
+          make -j$(nproc) V=s
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
