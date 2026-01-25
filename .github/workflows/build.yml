@@ -48,16 +48,11 @@ jobs:
             libncurses5-dev gettext xsltproc \
             bzip2 patch
       
-#      # ⭐ 关键：强制清理，确保 SUPPORTED_DEVICES 生效
-#      - name: Clean build tree
-#        run: |
-#          make target/linux/clean || true
-#          make dirclean || true
-
-      - name: Light clean (kernel + images only)
+      # ⭐ 关键：强制清理，确保 SUPPORTED_DEVICES 生效
+      - name: Clean build tree
         run: |
           make target/linux/clean || true
-          rm -rf bin/targets || true
+          make dirclean || true
 
       # 只 cache dl（这是安全的）
       - name: Cache dl
