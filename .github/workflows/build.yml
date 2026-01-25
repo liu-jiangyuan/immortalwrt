@@ -84,6 +84,7 @@ jobs:
         run: |
 #          make -j2 || make -j1 V=s
           make -j$(nproc) V=s
+
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
