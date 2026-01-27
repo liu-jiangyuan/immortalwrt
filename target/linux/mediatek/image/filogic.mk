@@ -996,6 +996,7 @@ define Device/bt_r320
   DEVICE_VENDOR := Globitel
   DEVICE_MODEL := BT-R320
   DEVICE_DTS := mt7981b-bt-r320
+  DEVICE_DTS_DIR := ../dts
   DEVICE_DTC_FLAGS := --pad 4096
   DEVICE_DTS_LOADADDR := 0x43f00000
   DEVICE_PACKAGES := kmod-mt7915e kmod-mt7981-firmware mt7981-wo-firmware \
