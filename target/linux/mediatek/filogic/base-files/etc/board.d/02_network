@@ -49,11 +49,10 @@ mediatek_setup_interfaces()
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
 		;;
 	# 单独为 BT R320 添加逻辑，显式定义 DSA 拓扑
-    	bt,r320)
-    		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
-    		ucidef_add_switch "switch0" \
-    			"1:lan" "2:lan" "3:lan" "4:wan" "6@eth0"
-    		;;
+    bt,r320)
+    	ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
+    	ucidef_add_switch "switch0" "1:lan" "2:lan" "3:lan" "4:wan" "6@eth0"
+    	;;
 	asus,tuf-ax4200|\
 	jdcloud,re-cp-03|\
 	mediatek,mt7981-rfb|\
