@@ -50,6 +50,7 @@ jobs:
       - name: Clean build tree
         run: |
           make target/linux/clean || true
+          make clean || true
           make dirclean || true
 
       # 只 cache dl（这是安全的）

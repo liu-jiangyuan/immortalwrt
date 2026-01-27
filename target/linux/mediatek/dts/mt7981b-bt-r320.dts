@@ -9,176 +9,173 @@
 #include "mt7981.dtsi"
 
 / {
-	model = "BT R320";
-	compatible = "bt,r320", "mediatek,mt7981";
+    model = "BT R320";
+    compatible = "bt,r320", "mediatek,mt7981";
 
-	aliases {
-		serial0 = &uart0;
-		label-mac-device = &gmac0;
-	};
+    aliases {
+       serial0 = &uart0;
+       label-mac-device = &gmac0;
+    };
 
-	chosen {
-		bootargs-override = "root=/dev/fit0 rootwait";
-		stdout-path = "serial0:115200n8";
-		rootdisk = <&emmc_rootdisk>;
-	};
+    chosen {
+       bootargs-override = "root=/dev/fit0 rootwait";
+       stdout-path = "serial0:115200n8";
+       rootdisk = <&emmc_rootdisk>;
+    };
 
-	memory {
-		reg = <0 0x40000000 0 0x40000000>;
-	};
+    memory {
+       reg = <0 0x40000000 0 0x40000000>;
+    };
 
-	gpio-keys {
-		compatible = "gpio-keys";
+    gpio-keys {
+       compatible = "gpio-keys";
 
-		reset {
-			label = "reset";
-			linux,code = <KEY_RESTART>;
-			gpios = <&pio 1 GPIO_ACTIVE_LOW>;
-		};
+       reset {
+          label = "reset";
+          linux,code = <KEY_RESTART>;
+          gpios = <&pio 1 GPIO_ACTIVE_LOW>;
+       };
 
-		wps {
-			label = "wps";
-			linux,code = <KEY_WPS_BUTTON>;
-			gpios = <&pio 0 GPIO_ACTIVE_LOW>;
-		};
-	};
+       wps {
+          label = "wps";
+          linux,code = <KEY_WPS_BUTTON>;
+          gpios = <&pio 0 GPIO_ACTIVE_LOW>;
+       };
+    };
 
-	gpio-leds {
-		compatible = "gpio-leds";
+    gpio-leds {
+       compatible = "gpio-leds";
 
-		wlan2g {
-			function = LED_FUNCTION_WLAN_2GHZ;
-			color = <LED_COLOR_ID_GREEN>;
-			gpios = <&pio 34 GPIO_ACTIVE_LOW>;
-		};
+       wlan2g {
+          function = LED_FUNCTION_WLAN_2GHZ;
+          color = <LED_COLOR_ID_GREEN>;
+          gpios = <&pio 34 GPIO_ACTIVE_LOW>;
+       };
 
-		wlan5g {
-			function = LED_FUNCTION_WLAN_5GHZ;
-			color = <LED_COLOR_ID_GREEN>;
-			gpios = <&pio 35 GPIO_ACTIVE_LOW>;
-		};
-	};
+       wlan5g {
+          function = LED_FUNCTION_WLAN_5GHZ;
+          color = <LED_COLOR_ID_GREEN>;
+          gpios = <&pio 35 GPIO_ACTIVE_LOW>;
+       };
+    };
 
-	reg_3p3v: regulator-3p3v {
-		compatible = "regulator-fixed";
-		regulator-name = "3.3V";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		regulator-always-on;
-	};
+    reg_3p3v: regulator-3p3v {
+       compatible = "regulator-fixed";
+       regulator-name = "3.3V";
+       regulator-min-microvolt = <3300000>;
+       regulator-max-microvolt = <3300000>;
+       regulator-always-on;
+    };
 };
 
-/* ================= Ethernet ================= */
-
 &eth {
-	status = "okay";
+    status = "okay";
 
-	gmac0: mac@0 {
-		compatible = "mediatek,eth-mac";
-		reg = <0>;
-		phy-mode = "2500base-x";
+    gmac0: mac@0 {
+       compatible = "mediatek,eth-mac";
+       reg = <0>;
+       phy-mode = "2500base-x";
 
-		/* 只绑定 MAC，不要 fixed-link */
-		nvmem-cells = <&macaddr_factory_2a 0>;
-		nvmem-cell-names = "mac-address";
-	};
+       nvmem-cells = <&macaddr_factory_2a 0>;
+       nvmem-cell-names = "mac-address";
+    };
 };
 
 &mdio_bus {
-	switch: switch@1f {
-		compatible = "mediatek,mt7531";
-		reg = <31>;
-		reset-gpios = <&pio 39 GPIO_ACTIVE_HIGH>;
+    switch: switch@1f {
+       compatible = "mediatek,mt7531";
+       reg = <31>;
+       reset-gpios = <&pio 39 GPIO_ACTIVE_LOW>;
 
-		interrupt-controller;
-		#interrupt-cells = <1>;
-		interrupt-parent = <&pio>;
-		interrupts = <38 IRQ_TYPE_LEVEL_HIGH>;
-	};
+       interrupt-controller;
+       #interrupt-cells = <1>;
+       interrupt-parent = <&pio>;
+       interrupts = <38 IRQ_TYPE_LEVEL_HIGH>;
+    };
 };
 
 &switch {
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
+    ports {
+       #address-cells = <1>;
+       #size-cells = <0>;
 
-		port@1 { reg = <1>; label = "lan1"; };
-		port@2 { reg = <2>; label = "lan2"; };
-		port@3 { reg = <3>; label = "lan3"; };
+       port@1 { reg = <1>; label = "lan1"; };
+       port@2 { reg = <2>; label = "lan2"; };
+       port@3 { reg = <3>; label = "lan3"; };
 
-		port@4 {
-			reg = <4>;
-			label = "wan";
-			/* WAN 是 PHY，不能 fixed-link */
-		};
+       port@4 {
+          reg = <4>;
+          label = "wan";
+          nvmem-cells = <&macaddr_factory_24 0>;
+          nvmem-cell-names = "mac-address";
+       };
 
-		/* CPU port：这里才允许 fixed-link */
-		port@6 {
-			reg = <6>;
-			ethernet = <&gmac0>;
-			phy-mode = "2500base-x";
+       port@6 {
+          reg = <6>;
+          ethernet = <&gmac0>;
+          phy-mode = "2500base-x";
 
-			fixed-link {
-				speed = <2500>;
-				full-duplex;
-				pause;
-			};
-		};
-	};
+          fixed-link {
+             speed = <2500>;
+             full-duplex;
+             pause;
+          };
+       };
+    };
 };
-
-/* ================= eMMC ================= */
 
 &mmc0 {
-	status = "okay";
-	bus-width = <8>;
-	non-removable;
-	no-sd;
-	no-sdio;
-	vmmc-supply = <&reg_3p3v>;
+    status = "okay";
+    bus-width = <8>;
+    non-removable;
+    no-sd;
+    no-sdio;
+    vmmc-supply = <&reg_3p3v>;
 
-	card@0 {
-		reg = <0>;
-		compatible = "mmc-card";
+    card@0 {
+       reg = <0>;
+       compatible = "mmc-card";
 
-		block {
-			compatible = "block-device";
+       block {
+          compatible = "block-device";
 
-			partitions {
-				factory {
-					partname = "factory";
+          partitions {
+             factory {
+                partname = "factory";
 
-					nvmem-layout {
-						compatible = "fixed-layout";
-						#address-cells = <1>;
-						#size-cells = <1>;
+                nvmem-layout {
+                   compatible = "fixed-layout";
+                   #address-cells = <1>;
+                   #size-cells = <1>;
 
-						eeprom_factory_0: eeprom@0 {
-							reg = <0x0 0x1000>;
-						};
+                   eeprom_factory_0: eeprom@0 {
+                      reg = <0x0 0x1000>;
+                   };
 
-						macaddr_factory_2a: macaddr@2a {
-							compatible = "mac-base";
-							reg = <0x2a 0x6>;
-							#nvmem-cell-cells = <1>;
-						};
-					};
-				};
+                   macaddr_factory_24: macaddr@24 {
+                      reg = <0x24 0x6>;
+                   };
 
-				emmc_rootdisk: production {
-					partname = "production";
-				};
-			};
-		};
-	};
+                   macaddr_factory_2a: macaddr@2a {
+                      compatible = "mac-base";
+                      reg = <0x2a 0x6>;
+                      #nvmem-cell-cells = <1>;
+                   };
+                };
+             };
+
+             emmc_rootdisk: production {
+                partname = "production";
+             };
+          };
+       };
+    };
 };
 
-/* ================= Others ================= */
-
 &wifi {
-	status = "okay";
-	nvmem-cells = <&eeprom_factory_0>;
-	nvmem-cell-names = "eeprom";
+    status = "okay";
+    nvmem-cells = <&eeprom_factory_0>;
+    nvmem-cell-names = "eeprom";
 };
 
 &uart0 { status = "okay"; };

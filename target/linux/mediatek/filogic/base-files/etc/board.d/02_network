@@ -10,9 +10,12 @@ mediatek_setup_interfaces()
 
 	case $board in
 	bt,r320)
-		# LAN 用 lan1 lan2 lan3，WAN 用 wan
-		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
-		;;
+            # 定义 LAN 和 WAN 逻辑接口
+    		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3" "wan"
+    		# 定义硬件交换机拓扑：1,2,3口为LAN，4口为WAN，6口是连接CPU的管脚(对应DTS里的port@6)
+    		ucidef_add_switch "switch0" \
+    			"1:lan" "2:lan" "3:lan" "4:wan" "6@eth0"
+    		;;
 	*)
 		# 兜底，不会影响 r320
 		ucidef_set_interfaces_lan_wan "lan1 lan2 lan3 lan4" "wan"
